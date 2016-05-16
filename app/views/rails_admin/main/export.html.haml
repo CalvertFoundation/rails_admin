@@ -1,10 +1,13 @@
 - params = request.params.except(:action, :controller, :utf8, :page, :per_page, :format, :authenticity_token)
 - visible_fields = @model_config.export.with(:view => self, :object => @abstract_model.model.new, :controller => self.controller).visible_fields
-- transaction_types_arr = ["",:P1, :ORIGPURCH, :SOLDINV, :PAIDINT, :EREDEEM, :TXFROUT, :TXFRIN, :WITHDRAW, :WITHINT]
 
-- transaction_types = Hash[transaction_types_arr.map { |u| [u, u] }]
+- transaction_types = Hash[["",:P1, :ORIGPURCH, :SOLDINV, :PAIDINT, :EREDEEM, :TXFROUT, :TXFRIN, :WITHDRAW, :WITHINT].map { |u| [u, u] }]
+- transaction_status = Hash[["", :pending, :processed, :transfer_to_angel, :transfer_to_issuer, :withdraw_pending, :failed, :settled, :lost, :escheated].map { |u| [u, u] }]
+- json_datetimepicker_config = '{"datepicker":{"dateFormat":"MM dd, yy","dayNames":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"dayNamesShort":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"dayNamesMin":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"firstDay":1,"monthNames":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthNamesShort":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"value":""},"timepicker":{"amPmText":["",""],"hourText":"Hour","minuteText":"Minute","showPeriod":false,"value":""},"showTime":false}'
 
 = form_tag export_path(params.merge(:all => true)), :method => 'post', :class => 'form-horizontal denser' do
+  
+  = @abstract_model
 
   %input{:name => "send_data", :type => "hidden", :value => "true"}/
   %fieldset{:id => 'fields_to_export'}
@@ -69,15 +72,28 @@
         = select_tag 'csv_options[generator][col_sep]', options_for_select({ '' => t('admin.export.csv.default_col_sep'), "<comma> ','" => ',', "<semicolon> ';'" => ';', '<tabs>' => "'\t'" })
         %p.help-block= t('admin.export.csv.col_sep_help', :value => t('admin.export.csv.default_col_sep'))
 
-  %fieldset
-    %legend
-      %i.icon-chevron-down
-      = t('admin.export.filter.type')
+  - if params["model_name"] == "transaction_history"
+    %fieldset
+      %legend
+        %i.icon-chevron-down
+        = t('admin.export.select.select_filters')
 
-    .control-group
-      %label.control-label{:for => "filter_type"}= t('admin.export.filter.type')
-      .controls
-        = select_tag 'query', options_for_select(transaction_types)
+      .control-group
+        %label.control-label{:for => 'filter_type'}= t('admin.export.filter.type')
+        .controls
+          = select_tag 'filters[type]', options_for_select(transaction_types)
+
+      .control-group
+        %label.control-label{:for => 'filter_status'}= t('admin.export.filter.status')
+        .controls
+          = select_tag 'filters[status]', options_for_select(transaction_status)
+
+      .control-group
+        %label.control-label{:for => 'filter_date_range'}= t('admin.export.filter.date_range')
+        .controls
+
+          = text_field_tag 'filters[ini_date]', nil, "data-datetimepicker": true, "data-options": json_datetimepicker_config
+          = text_field_tag 'filters[end_date]', nil, "data-datetimepicker": true, "data-options": json_datetimepicker_config
 
 
   .form-actions

@@ -127,10 +127,6 @@ module RailsAdmin
       # "0055" is the filter index, no use here. o is the operator, v the value
       def filter_scope(scope, filters, fields = config.list.fields.select(&:filterable?))
         filters.each_pair do |field_name, filters_dump|
-          puts "joseeeeee", field_name
-          puts "field", fields[0].name, fields[1].name, fields[2].name
-          puts "filter_dump", filters_dump
-          puts "---------"
           filters_dump.each do |_, filter_dump|
             wb = WhereBuilder.new(scope)
             wb.add(fields.detect { |f| f.name.to_s == field_name }, filter_dump[:v], (filter_dump[:o] || 'default'))

@@ -10,8 +10,6 @@ module RailsAdmin
     def initialize(objects = [], schema = {})
       return self if (@objects = objects).blank?
 
-      #puts "initialize", @objects
-
       @model = objects.dup.first.class
       @abstract_model = RailsAdmin::AbstractModel.new(@model)
       @model_config = @abstract_model.config
@@ -38,9 +36,11 @@ module RailsAdmin
     end
 
     def to_csv(options = {})
-      #puts "to_csv", @abstract_model
+      if !@abstract_model.present?
+        return if !@abstract_model.present?
+      end
       # encoding shenanigans first
-      @encoding_from = UTF8_ENCODINGS.include?(@abstract_model.encoding) ? 'UTF-8' : @abstract_model.encoding
+      @encoding_from =  UTF8_ENCODINGS.include?(@abstract_model.encoding) ? 'UTF-8' : @abstract_model.encoding if @abstract_model.present? && @abstract_model.encoding.present?
 
       @encoding_to = options[:encoding_to].presence || @encoding_from
 
@@ -80,7 +80,6 @@ module RailsAdmin
     end
 
     def generate_csv_string(options)
-      #puts "to_csv", @objects
       generator_options = (options[:generator] || {}).symbolize_keys.delete_if { |_, value| value.blank? }
       CSV_CLASS.generate(generator_options) do |csv|
         csv << generate_csv_header unless options[:skip_header]

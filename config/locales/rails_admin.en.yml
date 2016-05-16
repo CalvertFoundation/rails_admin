@@ -130,7 +130,12 @@ en:
       confirmation: "Export to %{name}"
       select: "Select fields to export"
       filter:
+        select_filters: "Filter options"
         type: "Select type"
+        status: "Select status"
+        date_range: "Select range of dates"
+        ini_date: "Start"
+        end_date: "End"
         select: "Select Filters"
         column: "Select column"
 

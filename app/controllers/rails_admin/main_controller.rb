@@ -33,8 +33,7 @@ module RailsAdmin
         scope = scope.merge(auth_scope)
       end
       scope = scope.instance_eval(&additional_scope) if additional_scope
-
-      get_collection(model_config, scope, pagination)
+      get_collection(model_config, scope, pagination, auth_scope_key)
     end
 
   private
@@ -123,24 +122,39 @@ module RailsAdmin
       end
     end
 
-    def get_collection(model_config, scope, pagination)
-      puts "get_collection", params
+    def get_collection(model_config, scope, pagination, auth_scope_key)
+
+      if params[:filters].present? then
+        params[:f] = {}
+
+        if params[:filters][:type].present? then
+          params[:f][:transaction_type] = {"0000"=>{"o"=>"equal", "v"=>params[:filters][:type]}}
+        end
+
+        if params[:filters][:status].present? then
+          params[:f][:status] = {"0000"=>{"o"=>"equal", "v"=>params[:filters][:status]}}
+        end
+
+        if params[:filters][:ini_date].present? and params[:filters][:end_date].present? then
+          date_format = I18n.t("admin.misc.filter_date_format", :default => I18n.t("admin.misc.filter_date_format", :locale => :en)).gsub('dd', '%d').gsub('mm', '%m').gsub('yy', '%Y')
+
+          iniDate = (Date.parse params[:filters][:ini_date]).strftime(date_format)
+          endDate = (Date.parse params[:filters][:end_date]).strftime(date_format)
+          params[:f][:created_at] = {"0000"=>{"o"=>"between", "v"=>["", iniDate, endDate]}}
+        end
+
+      end
+
       associations = model_config.list.fields.select { |f| f.type == :belongs_to_association && !f.polymorphic? }.collect { |f| f.association[:name] }
       options = {}
       options = options.merge(page: (params[Kaminari.config.param_name] || 1).to_i, per: (params[:per] || model_config.list.items_per_page)) if pagination
       options = options.merge(include: associations) unless associations.blank?
       options = options.merge(get_sort_hash(model_config))
-      #params[:query] = "P1"
       options = options.merge(query: params[:query]) if params[:query].present?
-      
-      params[:f] = { :amount => {"0055"=>{"o"=>"like", "v"=>444} }}
-
       # filters example => {"string_field"=>{"0055"=>{"o"=>"like", "v"=>"test_value"}}, ...}
       # "0055" is the filter index, no use here. o is the operator, v the value
-
       options = options.merge(filters: params[:f]) if params[:f].present?
       options = options.merge(bulk_ids: params[:bulk_ids]) if params[:bulk_ids]
-      puts "options", options
       model_config.abstract_model.all(options, scope)
     end
 
