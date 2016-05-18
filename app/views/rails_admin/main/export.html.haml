@@ -92,8 +92,8 @@
         %label.control-label{:for => 'filter_date_range'}= t('admin.export.filter.date_range')
         .controls
 
-          = text_field_tag 'filters[ini_date]', nil, "data-datetimepicker": true, "data-options": json_datetimepicker_config
-          = text_field_tag 'filters[end_date]', nil, "data-datetimepicker": true, "data-options": json_datetimepicker_config
+          = text_field_tag 'filters[ini_date]', nil, "data-datetimepicker" => true, "data-options" => json_datetimepicker_config
+          = text_field_tag 'filters[end_date]', nil, "data-datetimepicker" => true, "data-options" => json_datetimepicker_config
 
 
   .form-actions
