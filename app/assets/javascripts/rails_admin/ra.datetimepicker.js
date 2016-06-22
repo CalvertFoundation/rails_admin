@@ -56,10 +56,8 @@
       if (this.options.showDate) {
         locale = "en-us",
         date = this.datepicker.val();
-        console.log(date);
         var objDate = new Date(date);
         value.push(objDate.toLocaleString(locale, { month: "long", day: 'numeric', year: 'numeric'}));
-        console.log(value);
       }
 
       if (this.options.showTime) {
